@@ -31,7 +31,11 @@ public class URICheckEncodingMonitor extends AdministrativeMonitor {
     }
 
     public FormValidation doCheckURIEncoding(StaplerRequest request) throws IOException {
-        Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+
+        System.out.println("DEBUG TO REMOVE");
+        System.out.println("doCheckURIEncoding:"+request.getRequestURIWithQueryString());
+
+        Jenkins.get().checkPermission(Jenkins.CONFIGURE_JENKINS);
         // expected is non-ASCII String
         final String expected = "\u57f7\u4e8b";
         final String value = fixEmpty(request.getParameter("value"));
