@@ -223,6 +223,7 @@ import org.jvnet.hudson.reactor.Task;
 import org.jvnet.hudson.reactor.TaskBuilder;
 import org.jvnet.hudson.reactor.TaskGraphBuilder;
 import org.jvnet.hudson.reactor.TaskGraphBuilder.Handle;
+import org.jvnet.localizer.Localizable;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.args4j.Argument;
@@ -5259,6 +5260,9 @@ public class Jenkins extends AbstractCIBase implements DirectlyModifiableTopLeve
     public static final Permission ADMINISTER = Permission.HUDSON_ADMINISTER;
     public static final Permission READ = new Permission(PERMISSIONS,"Read",Messages._Hudson_ReadPermission_Description(),Permission.READ,PermissionScope.JENKINS);
     public static final Permission RUN_SCRIPTS = new Permission(PERMISSIONS, "RunScripts", Messages._Hudson_RunScriptsPermission_Description(),ADMINISTER,PermissionScope.JENKINS);
+    public static final Permission CONFIGURE = new Permission(PERMISSIONS, "Configure",
+                                                              Messages._Item_CONFIGURE_description(), null,
+                                                               PermissionScope.JENKINS);
 
     /**
      * Urls that are always visible without READ permission.
