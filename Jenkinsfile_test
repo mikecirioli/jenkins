@@ -1,0 +1,55 @@
+pipeline {
+    agent {
+        kubernetes {
+            defaultContainer 'jnlp'
+            yaml """
+apiVersion: v1
+kind: Pod
+metadata:
+    name: astro/linux-plugin-build
+    annotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: false
+spec:
+    containers:
+    - name: jnlp
+      image: 063356183961.dkr.ecr.us-east-1.amazonaws.com/astro/openjdk8-non-root:2
+      tty: true
+      args: 
+      - '\$(JENKINS_SECRET)'
+      - '\$(JENKINS_NAME)'
+      resources:
+        requests:
+          cpu: 6
+          memory: 6Gi
+        limits:
+          cpu: 6
+          memory: 6Gi  
+"""
+        }
+    }
+
+    stages {
+
+        stage('Install') {
+            steps {
+                withMaven(
+                        globalMavenSettingsConfig: 'maven-settings-nexus-internal-ci-build-jobs',
+                        jdk: 'jdk-8',
+                        maven: 'mvn-3.6.2') {
+                    sh 'mvn --batch-mode install -DskipTests'
+                }
+            }
+        }
+        
+        stage('Unit tests') {
+            steps {
+                withMaven(
+                        globalMavenSettingsConfig: 'maven-settings-nexus-internal-ci-build-jobs',
+                        jdk: 'jdk-8',
+                        maven: 'mvn-3.6.2') {
+                    sh 'mvn --batch-mode test -DforkCount=4 -Dfindbugs.failOnError=false -Dsurefire.rerunFailingTestsCount=0'
+                }
+            }
+        }
+    }
+}
