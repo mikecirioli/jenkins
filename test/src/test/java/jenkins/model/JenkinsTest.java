@@ -281,12 +281,14 @@ public class JenkinsTest {
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
         j.jenkins.setAuthorizationStrategy(new FullControlOnceLoggedInAuthorizationStrategy());
         WebClient wc = j.createWebClient();
-        wc.goTo("foobar");
-        wc.goTo("foobar/");
-        wc.goTo("foobar/zot");
+
+        // Access a declared unprotected path should work for anonymous
+        assertEquals(wc.goTo("foobar").getWebResponse().getStatusCode(),HttpURLConnection.HTTP_OK);
+        assertEquals(wc.goTo("foobar/").getWebResponse().getStatusCode(),HttpURLConnection.HTTP_OK);
+        assertEquals(wc.goTo("foobar/zot").getWebResponse().getStatusCode(),HttpURLConnection.HTTP_OK);
 
         // and make sure this fails
-        wc.assertFails("foobar-zot/", HttpURLConnection.HTTP_INTERNAL_ERROR);
+        wc.assertFails("foobar-zot/", HttpURLConnection.HTTP_FORBIDDEN);
 
         assertEquals(3,j.jenkins.getExtensionList(RootAction.class).get(RootActionImpl.class).count);
     }
