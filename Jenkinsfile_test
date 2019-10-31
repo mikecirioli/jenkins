@@ -52,4 +52,9 @@ spec:
             }
         }
     }
+    post {
+        always {
+            junit 'test/target/**/*.xml'
+        }
+    }
 }
