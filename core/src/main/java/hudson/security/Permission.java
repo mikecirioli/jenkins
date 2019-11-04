@@ -37,6 +37,8 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 import org.jvnet.localizer.Localizable;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 
 /**
  * Permission, which represents activity that requires a security privilege.
@@ -317,6 +319,18 @@ public final class Permission {
     @Deprecated
     public static final Permission HUDSON_ADMINISTER = new Permission(HUDSON_PERMISSIONS,"Administer", hudson.model.Messages._Hudson_AdministerPermission_Description(),null);
 
+    /**
+     * Allows non-privilege escalating configuration permission for a Jenkins instance.  Actions which could result
+     * in a privilege  escalation (such as RUN_SCRIPTS) require explicit ADMINISTER permission
+     *
+     * @see Jenkins#CONFIGURE_JENKINS
+     */
+    //It's created in this class to avoid loop dependency during static initialization:
+    //Jenkins#READ <- Permission#READ <- Permission#CONFIGURE_JENKINS <- Permission#HUDSON_ADMINISTER
+    @Restricted(NoExternalUse.class)
+    public static final Permission CONFIGURE_JENKINS = new Permission(HUDSON_PERMISSIONS, "Configure",
+                                                                hudson.model.Messages._Hudson_ConfigureJenkins_Description(), HUDSON_ADMINISTER, PermissionScope.JENKINS);
+
 //
 //
 // Root Permissions.
@@ -340,7 +354,7 @@ public final class Permission {
     /**
      * Generic read access.
      */
-    public static final Permission READ = new Permission(GROUP,"GenericRead",null,HUDSON_ADMINISTER);
+    public static final Permission READ = new Permission(GROUP,"GenericRead",null,CONFIGURE_JENKINS);
 
     /**
      * Generic write access.
