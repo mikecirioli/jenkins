@@ -42,13 +42,29 @@ spec:
         }
         
         stage('Unit tests') {
-            steps {
-                withMaven(
-                        globalMavenSettingsConfig: 'maven-settings-nexus-internal-ci-build-jobs',
-                        jdk: 'jdk-8',
-                        maven: 'mvn-3.6.2') {
-                    sh 'mvn --batch-mode test -DforkCount=4 -Dfindbugs.failOnError=false -Dsurefire.rerunFailingTestsCount=0'
+            parallel {
+                stage ('/test folder') {
+                    steps {
+                    withMaven(
+                            globalMavenSettingsConfig: 'maven-settings-nexus-internal-ci-build-jobs',
+                            jdk: 'jdk-8',
+                            maven: 'mvn-3.6.2') {
+                        sh 'mvn -f test/pom.xml --batch-mode test -DforkCount=4 -Dfindbugs.failOnError=false -Dsurefire.rerunFailingTestsCount=0'
+                        }
+                    }
                 }
+
+                stage ('/core folder') {
+                    steps {
+                    withMaven(
+                            globalMavenSettingsConfig: 'maven-settings-nexus-internal-ci-build-jobs',
+                            jdk: 'jdk-8',
+                            maven: 'mvn-3.6.2') {
+                        sh 'mvn -f core/pom.xml --batch-mode test -DforkCount=4 -Dfindbugs.failOnError=false -Dsurefire.rerunFailingTestsCount=0'
+                        }
+                    }
+                }
+                
             }
         }
     }
