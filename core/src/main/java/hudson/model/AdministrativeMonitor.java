@@ -162,7 +162,7 @@ public abstract class AdministrativeMonitor extends AbstractModelObject implemen
     }
 
     /**
-     * Requires CONFIGURE_JENKINS permission for any operation in here.
+     * Requires ADMINISTER permission for any operation in here.
      */
     @Restricted(NoExternalUse.class)
     public Object getTarget() {

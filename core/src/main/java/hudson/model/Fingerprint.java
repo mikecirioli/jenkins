@@ -123,7 +123,7 @@ public class Fingerprint implements ModelObject, Saveable {
          *      or if the current user has {@link Jenkins#ADMINISTER} permissions.
          *      If the job exists, but the current user has no permission to discover it, 
          *      {@code false}  will be returned.
-         *      If the job has been deleted and the user has no {@link Jenkins#CONFIGURE_JENKINS} permissions,
+         *      If the job has been deleted and the user has no {@link Jenkins#ADMINISTER} permissions,
          *      it also returns {@code false}   in order to avoid the job existence fact exposure.
          */
         private boolean hasPermissionToDiscoverBuild() {
