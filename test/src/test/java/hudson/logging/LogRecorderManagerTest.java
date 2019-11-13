@@ -23,7 +23,9 @@
  */
 package hudson.logging;
 
+import jenkins.model.Jenkins;
 import jenkins.security.MasterToSlaveCallable;
+import org.jvnet.hudson.test.MockAuthorizationStrategy;
 import org.jvnet.hudson.test.Url;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
@@ -52,15 +54,35 @@ public class LogRecorderManagerTest {
      */
     @Url("http://d.hatena.ne.jp/ssogabe/20090101/1230744150")
     @Test public void loggerConfig() throws Exception {
+        assertLoggerCanBeConfigured(null);
+    }
+
+    private void assertLoggerCanBeConfigured(String userName) throws Exception {
         Logger logger = Logger.getLogger("foo.bar.zot");
 
-        HtmlPage page = j.createWebClient().goTo("log/levels");
+        JenkinsRule.WebClient wc = j.createWebClient();
+        if(userName != null) wc = wc.login(userName);
+
+        HtmlPage page = wc.goTo("log/levels");
         HtmlForm form = page.getFormByName("configLogger");
         form.getInputByName("name").setValueAttribute("foo.bar.zot");
         form.getSelectByName("level").getOptionByValue("finest").setSelected(true);
         j.submit(form);
 
         assertEquals(logger.getLevel(), Level.FINEST);
+    }
+
+    /**
+     * Makes sure that the logger configuration works with {@link Jenkins#CONFIGURE_JENKINS} permission
+     */
+    @Test public void loggerConfigWithConfigurePermissionAllowed() throws Exception {
+        final String CONFIGURATOR = "configurator";
+        j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
+        j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
+                                                   .grant(Jenkins.CONFIGURE_JENKINS, Jenkins.READ).everywhere().to(CONFIGURATOR)
+        );
+
+        assertLoggerCanBeConfigured(CONFIGURATOR);
     }
 
     @Issue("JENKINS-18274")
