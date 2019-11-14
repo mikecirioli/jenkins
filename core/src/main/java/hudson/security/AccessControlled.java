@@ -48,6 +48,13 @@ public interface AccessControlled {
     }
 
     /**
+     * Convenient short-cut for {@code getACL().checkHasAtLeastOnePermission(permissions)}
+     */
+    default void checkHasAtLeastOnePermission(Permission...permissions) throws AccessDeniedException {
+        getACL().checkHasAtLeastOnePermission(permissions);
+    }
+
+    /**
      * Convenient short-cut for {@code getACL().hasPermission(permission)}
      */
     default boolean hasPermission(@Nonnull Permission permission) {

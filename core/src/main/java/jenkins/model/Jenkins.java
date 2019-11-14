@@ -4755,12 +4755,11 @@ public class Jenkins extends AbstractCIBase implements DirectlyModifiableTopLeve
 
     public Object getTarget() {
         try {
-            checkPermission(READ);
+            checkHasAtLeastOnePermission(READ,CONFIGURE_JENKINS);
         } catch (AccessDeniedException e) {
             if (!isSubjectToMandatoryReadPermissionCheck(Stapler.getCurrentRequest().getRestOfPath())) {
                 return this;
             }
-
             throw e;
         }
         return this;

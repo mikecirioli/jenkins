@@ -74,6 +74,34 @@ public abstract class ACL {
     }
 
     /**
+     * Checks if the current security principal has at least one of the listed permissions.
+     * @param permissions
+     *
+     * @throws AccessDeniedException
+     *      *      if the user doesn't have one permission at all.
+     */
+    public final void checkHasAtLeastOnePermission(@Nonnull Permission...permissions) {
+
+        if (permissions.length<1) {
+            return;
+        } else {
+            Authentication a = Jenkins.getAuthentication();
+            if (a == SYSTEM) {
+                return;
+            }
+
+            boolean hasPermission = false;
+            for (Permission p: permissions) {
+                hasPermission = hasPermission || hasPermission(a,p);
+            }
+
+            if(!hasPermission) {
+                throw new AccessDeniedException2(a,permissions[0]);
+            }
+        }
+    }
+
+    /**
      * Checks if the current security principal has this permission.
      *
      * @return false
