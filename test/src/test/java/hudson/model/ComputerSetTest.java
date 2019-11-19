@@ -93,16 +93,13 @@ public class ComputerSetTest {
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
         j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
                                                    .grant(Jenkins.CONFIGURE_JENKINS, Jenkins.READ).everywhere().to(CONFIGURATOR));
-
-        {
-            //WHEN the user go to Monitors
-            WebClient client = j.createWebClient();
-            HtmlPage page = client.withBasicCredentials(CONFIGURATOR).goTo("computer");
-            //THEN the user can see monitor information
-            assertCanSeeMonitor(page, "Free Disk Space");
-            assertCanSeeMonitor(page, "Free Swap Space");
-            assertCanSeeMonitor(page, "Free Temp Space");
-        }
+        //WHEN the user go to Monitors
+        WebClient client = j.createWebClient();
+        HtmlPage page = client.withBasicCredentials(CONFIGURATOR).goTo("computer");
+        //THEN the user can see monitor information
+        assertCanSeeMonitor(page, "Free Disk Space");
+        assertCanSeeMonitor(page, "Free Swap Space");
+        assertCanSeeMonitor(page, "Free Temp Space");
     }
 
     @Test
