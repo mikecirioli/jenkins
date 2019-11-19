@@ -87,6 +87,7 @@ public class ComputerSetTest {
 
     @Test
     public void monitorDisplayedWithConfigurePermission() throws Exception {
+        //GIVEN a user with CONFIGURE_JENKINS permission
         final String CONFIGURATOR = "configurator";
 
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
@@ -94,8 +95,10 @@ public class ComputerSetTest {
                                                    .grant(Jenkins.CONFIGURE_JENKINS, Jenkins.READ).everywhere().to(CONFIGURATOR));
 
         {
+            //WHEN the user go to Monitors
             WebClient client = j.createWebClient();
             HtmlPage page = client.withBasicCredentials(CONFIGURATOR).goTo("computer");
+            //THEN the user can see monitor information
             assertCanSeeMonitor(page, "Free Disk Space");
             assertCanSeeMonitor(page, "Free Swap Space");
             assertCanSeeMonitor(page, "Free Temp Space");
@@ -104,13 +107,16 @@ public class ComputerSetTest {
 
     @Test
     public void monitorNotDisplayedWithoutConfigurePermission() throws Exception {
+        //GIVEN a user with only READ permission
         final String USER = "user";
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
         j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy().grant(Jenkins.READ).everywhere().to(USER));
 
         {
+            //WHEN the user goes to monitor
             WebClient client = j.createWebClient();
             HtmlPage page = client.withBasicCredentials(USER).goTo("computer");
+            //THEN the user is not able to see information.
             assertCanNotSeeMonitor(page, "Free Disk Space");
             assertCanNotSeeMonitor(page, "Free Swap Space");
             assertCanNotSeeMonitor(page, "Free Temp Space");

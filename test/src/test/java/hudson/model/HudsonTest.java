@@ -96,12 +96,15 @@ public class HudsonTest {
 
     @Test
     public void someGlobalConfigurationIsNotDisplayedWithConfigurePermission() throws Exception {
+        //GIVEN a user with CONFIGURE_JENKINS permission
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
         j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
                                                    .grant(Jenkins.CONFIGURE_JENKINS, Jenkins.READ).everywhere().toEveryone());
 
+        //WHEN the user goes to /configure page
         HtmlForm form = j.createWebClient().goTo("configure").getFormByName("config");
         String formText = form.asText();
+        //THEN items restricted to ADMINISTER only should not be displayed.
         assertThat("Shouldn't be able to configure # of executors", formText, not(containsString("executors")));
         assertThat("Shouldn't be able to configure Global properties", formText,
                    not(containsString("Global properties")));
@@ -113,13 +116,14 @@ public class HudsonTest {
 
     @Test
     public void someGlobalConfigCanNotBeModifiedWithConfigurePermission() throws Exception {
+        //GIVEN a user with CONFIGURE_JENKINS permission
         int currentNumberExecutors = j.getInstance().getNumExecutors();
         View primary = j.getInstance().getPrimaryView();
         String shell = getShell();
 
         j.getInstance().addView(new ListView("otherView"));
 
-        //Load the form without authz restrictions
+        //WHEN the user tries to configure executor with an HTTP Form request
         HtmlForm form = j.createWebClient().goTo("configure").getFormByName("config");
         form.getInputByName("_.numExecutors").setValueAttribute(""+(currentNumberExecutors+1));
         form.getSelectByName("primaryView").setSelectedAttribute("otherView", true);
@@ -130,6 +134,7 @@ public class HudsonTest {
         j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
                                                    .grant(Jenkins.CONFIGURE_JENKINS, Jenkins.READ).everywhere().toEveryone());
         j.submit(form);
+        //THEN the value of restricted configuration should not change.
         assertEquals("shouldn't be allowed to change the number of executors", currentNumberExecutors, j.getInstance().getNumExecutors());
         assertEquals("shouldn't be allowed to change the primary view", primary, j.getInstance().getPrimaryView());
         assertEquals("shouldn't be allowed to change the shell executable", shell, getShell());

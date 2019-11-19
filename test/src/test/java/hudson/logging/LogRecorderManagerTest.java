@@ -75,7 +75,8 @@ public class LogRecorderManagerTest {
     /**
      * Makes sure that the logger configuration works with {@link Jenkins#CONFIGURE_JENKINS} permission
      */
-    @Test public void loggerConfigWithConfigurePermissionAllowed() throws Exception {
+    @Test
+    public void loggerConfigWithConfigurePermissionAllowed() throws Exception {
         final String CONFIGURATOR = "configurator";
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
         j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
