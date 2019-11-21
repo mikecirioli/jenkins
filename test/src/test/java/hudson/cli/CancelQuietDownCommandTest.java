@@ -89,6 +89,18 @@ public class CancelQuietDownCommandTest {
         QuietDownCommandTest.assertJenkinsNotInQuietMode(j);
     }
 
+    @Test
+    public void cancelQuietDownShouldSuccessWithConfigurePermission() throws Exception {
+        //GIVEN a user with CONFIGURE_JENKINS permission
+        //WHEN cancel quiet down is called
+        final CLICommandInvoker.Result result = command
+                .authorizedTo(Jenkins.READ, Jenkins.CONFIGURE_JENKINS)
+                .invoke();
+        //THEN cancel quietDown worked
+        assertThat(result, succeededSilently());
+        QuietDownCommandTest.assertJenkinsNotInQuietMode(j);
+    }
+
     //
     // Scenario - cancel-quiet-down is called when executor is running on non-quiet-down Jenkins
     // Result - CLI call result is available immediately, execution won't be affected

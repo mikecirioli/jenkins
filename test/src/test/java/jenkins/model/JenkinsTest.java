@@ -33,6 +33,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 import com.gargoylesoftware.htmlunit.HttpMethod;
 import com.gargoylesoftware.htmlunit.Page;
@@ -41,6 +42,7 @@ import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
+import hudson.cli.CLICommandInvoker;
 import hudson.model.Computer;
 import hudson.model.Failure;
 import hudson.model.InvisibleAction;
@@ -62,6 +64,8 @@ import hudson.util.VersionNumber;
 
 import jenkins.AgentProtocol;
 import jenkins.security.apitoken.ApiTokenTestHelper;
+
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -86,6 +90,9 @@ import java.util.Set;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
 
 import javax.annotation.CheckForNull;
+
+import static hudson.cli.CLICommandInvoker.Matcher.failedWith;
+import static hudson.cli.CLICommandInvoker.Matcher.succeededSilently;
 
 /**
  * Tests of the {@link Jenkins} class instance logic.
@@ -705,4 +712,21 @@ public class JenkinsTest {
     public void jobCreatedByInitializerIsRetained() {
         assertNotNull("JENKINS-47406 should exist", j.jenkins.getItem("JENKINS-47406"));
     }
+
+    @Test
+    public void doExitSuccessWithConfigurePermission() {
+        CLICommandInvoker.Result result = new CLICommandInvoker(j, "shutdown")
+                .authorizedTo(Jenkins.READ, Jenkins.CONFIGURE_JENKINS)
+                .invoke();
+        assertThat(result, succeededSilently());
+    }
+
+    @Test
+    public void doSafeExitSuccessWithConfigurePermission() {
+        CLICommandInvoker.Result result = new CLICommandInvoker(j, "safe-shutdown")
+                .authorizedTo(Jenkins.READ, Jenkins.CONFIGURE_JENKINS)
+                .invoke();
+        assertThat(result, succeededSilently());
+    }
+
 }

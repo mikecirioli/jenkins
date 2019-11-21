@@ -91,6 +91,15 @@ public class QuietDownCommandTest {
     }
 
     @Test
+    public void quietDownShouldSuccessWithConfigurePermission() throws Exception {
+        final CLICommandInvoker.Result result = command
+                .authorizedTo(Jenkins.READ, Jenkins.CONFIGURE_JENKINS)
+                .invoke();
+        assertThat(result, succeededSilently());
+        assertJenkinsInQuietMode();
+    }
+
+    @Test
     public void quietDownShouldSuccessWithBlock() throws Exception {
         final CLICommandInvoker.Result result = command
                 .authorizedTo(Jenkins.READ, Jenkins.ADMINISTER)
