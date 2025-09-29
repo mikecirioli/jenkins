@@ -150,11 +150,6 @@ class CloudProvisioningLimitsTest {
     @Test
     void testDebugCloudSetup() {
         // Debug the cloud setup
-        System.out.println("=== DEBUG CLOUD SETUP ===");
-        System.out.println("Cloud name: " + cloudWithLimits.name);
-        System.out.println("Supports limits: " + cloudWithLimits.supportsProvisioningLimits());
-        System.out.println("Global cap: " + cloudWithLimits.getGlobalProvisioningCap());
-        System.out.println("Template1 cap: " + cloudWithLimits.getTemplateProvisioningCap("template1"));
 
         assertTrue(cloudWithLimits.supportsProvisioningLimits());
         assertEquals(5, cloudWithLimits.getGlobalProvisioningCap());
@@ -162,11 +157,7 @@ class CloudProvisioningLimitsTest {
         assertEquals(Integer.MAX_VALUE, cloudWithLimits.getTemplateProvisioningCap("other-template"));
 
         // Test single registration - register only reserves pending
-        System.out.println("=== ATTEMPTING REGISTRATION ===");
         boolean registerResult = limits.register(cloudWithLimits, "template1", 1);
-        System.out.println("Register result: " + registerResult);
-        System.out.println("Cloud count after register: " + limits.getCloudExecutorCount("test-cloud"));
-        System.out.println("Template count after register: " + limits.getTemplateExecutorCount("test-cloud", "template1"));
 
         assertTrue(registerResult);
         assertEquals(0, limits.getCloudExecutorCount("test-cloud")); // Should still be 0 (pending only)
@@ -254,28 +245,9 @@ class CloudProvisioningLimitsTest {
         assertEquals(2, limits.getCloudExecutorCount("test-cloud"));
 
         // Verify initial state
-        System.out.println("=== Before unregisterNode ===");
-        System.out.println("Node name: " + node.getNodeName());
-        System.out.println("Node display name: " + node.getDisplayName());
-        System.out.println("Node executors: " + node.getNumExecutors());
-        System.out.println("Cloud name: " + cloudWithLimits.name);
-        System.out.println("Cloud count before: " + limits.getCloudExecutorCount("test-cloud"));
-
-        // Check Jenkins clouds
-        System.out.println("Jenkins clouds count: " + r.jenkins.clouds.size());
-        for (Cloud cloud : r.jenkins.clouds) {
-            System.out.println("  Cloud: " + cloud.name + " (class: " + cloud.getClass().getSimpleName() + ")");
-        }
-
-        // Check node computer
-        System.out.println("Node computer: " + node.toComputer());
-        System.out.println("Node computer null? " + (node.toComputer() == null));
 
         // Simulate node deletion - this tests the integration with ProvisioningNodeListener
         limits.unregisterNode(node);
-
-        System.out.println("=== After unregisterNode ===");
-        System.out.println("Cloud count after: " + limits.getCloudExecutorCount("test-cloud"));
 
         // The counts should be decremented (assuming the heuristic matches the node to the cloud)
         // Note: The exact behavior depends on the belongsToCloud heuristic implementation
