@@ -275,4 +275,5 @@ class NoDelayProvisionerStrategyTest {
             assertEquals(0, limitedCloud.getProvisioningCount());
         }
     }
+
 }

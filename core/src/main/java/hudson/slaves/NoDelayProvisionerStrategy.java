@@ -132,6 +132,21 @@ public class NoDelayProvisionerStrategy extends NodeProvisioner.Strategy {
 
             int requestedExecutors = Math.min(remainingDemand, getMaxProvisioningBatchSize(cloud));
 
+            // Allow CloudProvisioningListener extensions to block provisioning
+            boolean blockedByListener = false;
+            for (CloudProvisioningListener listener : CloudProvisioningListener.all()) {
+                if (listener.canProvision(cloud, cloudState, requestedExecutors) != null) {
+                    cloudsSkipped++;
+                    LOGGER.log(Level.FINE, "Cloud {0} provisioning blocked by listener {1}",
+                        new Object[]{cloud.name, listener.getClass().getName()});
+                    blockedByListener = true;
+                    break;
+                }
+            }
+            if (blockedByListener) {
+                continue;
+            }
+
             // Check provisioning limits before attempting to provision
             if (!checkProvisioningLimits(cloud, null, requestedExecutors)) {
                 cloudsSkipped++;
@@ -261,6 +276,11 @@ public class NoDelayProvisionerStrategy extends NodeProvisioner.Strategy {
 
             Collection<NodeProvisioner.PlannedNode> plannedNodes = cloud.provision(cloudState, requestedExecutors);
             long duration = System.currentTimeMillis() - startTime;
+
+            // Notify listeners that provisioning has started for these nodes
+            if (plannedNodes != null) {
+                fireOnStarted(cloud, label, plannedNodes);
+            }
 
             if (plannedNodes == null || plannedNodes.isEmpty()) {
                 String reason = "Cloud returned no planned nodes";
@@ -480,5 +500,32 @@ public class NoDelayProvisionerStrategy extends NodeProvisioner.Strategy {
             }
         }
         return null;
+    }
+
+    /**
+     * Notifies all CloudProvisioningListener instances that provisioning has started.
+     *
+     * This method is called after a cloud has successfully returned planned nodes,
+     * but before those nodes are necessarily ready for connection. It ensures that
+     * the provisioning lifecycle contract is maintained consistently with the
+     * StandardStrategyImpl behavior.
+     *
+     * @param cloud the cloud doing the provisioning
+     * @param label the label which requires additional capacity (may be null)
+     * @param plannedNodes the planned nodes
+     */
+    private static void fireOnStarted(@NonNull Cloud cloud, Label label,
+                                      @NonNull Collection<NodeProvisioner.PlannedNode> plannedNodes) {
+        for (CloudProvisioningListener cl : CloudProvisioningListener.all()) {
+            try {
+                cl.onStarted(cloud, label, plannedNodes);
+            } catch (Error e) {
+                throw e;
+            } catch (Throwable e) {
+                LOGGER.log(Level.SEVERE, "Unexpected uncaught exception encountered while "
+                        + "processing onStarted() listener call in " + cl + " for label "
+                        + (label != null ? label.toString() : "null"), e);
+            }
+        }
     }
 }
